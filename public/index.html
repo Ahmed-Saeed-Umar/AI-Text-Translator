@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Translate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="logo">
+      <span class="logo-icon">⟲</span>
+      <span class="logo-text">translr</span>
+    </div>
+    <div class="header-badge">Powered by Groq · llama3-70b</div>
+  </header>
+
+  <main class="main">
+    <div class="hero-label">English → Any Language</div>
+
+    <div class="lang-row">
+      <div class="lang-chip from">
+        <span class="flag">🇬🇧</span> English
+      </div>
+      <button class="arrow-btn" aria-label="Direction indicator">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="lang-select-wrap">
+        <select id="targetLang" class="lang-select" aria-label="Target language">
+          <option value="">Pick a language…</option>
+          <optgroup label="Most used">
+            <option value="Spanish">Spanish</option>
+            <option value="French">French</option>
+            <option value="German">German</option>
+            <option value="Chinese (Simplified)">Chinese (Simplified)</option>
+            <option value="Arabic">Arabic</option>
+            <option value="Hindi">Hindi</option>
+            <option value="Urdu">Urdu</option>
+            <option value="Portuguese">Portuguese</option>
+          </optgroup>
+          <optgroup label="All languages">
+            <option value="Afrikaans">Afrikaans</option>
+            <option value="Bengali">Bengali</option>
+            <option value="Bulgarian">Bulgarian</option>
+            <option value="Catalan">Catalan</option>
+            <option value="Chinese (Traditional)">Chinese (Traditional)</option>
+            <option value="Croatian">Croatian</option>
+            <option value="Czech">Czech</option>
+            <option value="Danish">Danish</option>
+            <option value="Dutch">Dutch</option>
+            <option value="Finnish">Finnish</option>
+            <option value="Greek">Greek</option>
+            <option value="Gujarati">Gujarati</option>
+            <option value="Hebrew">Hebrew</option>
+            <option value="Hungarian">Hungarian</option>
+            <option value="Indonesian">Indonesian</option>
+            <option value="Italian">Italian</option>
+            <option value="Japanese">Japanese</option>
+            <option value="Kannada">Kannada</option>
+            <option value="Korean">Korean</option>
+            <option value="Malay">Malay</option>
+            <option value="Marathi">Marathi</option>
+            <option value="Norwegian">Norwegian</option>
+            <option value="Persian">Persian</option>
+            <option value="Polish">Polish</option>
+            <option value="Punjabi">Punjabi</option>
+            <option value="Romanian">Romanian</option>
+            <option value="Russian">Russian</option>
+            <option value="Serbian">Serbian</option>
+            <option value="Slovak">Slovak</option>
+            <option value="Slovenian">Slovenian</option>
+            <option value="Swahili">Swahili</option>
+            <option value="Swedish">Swedish</option>
+            <option value="Tamil">Tamil</option>
+            <option value="Telugu">Telugu</option>
+            <option value="Thai">Thai</option>
+            <option value="Turkish">Turkish</option>
+            <option value="Ukrainian">Ukrainian</option>
+            <option value="Vietnamese">Vietnamese</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+
+    <div class="panels">
+
+      <!-- INPUT PANEL -->
+      <div class="panel" id="inputPanel">
+        <div class="panel-tabs">
+          <button class="ptab active" id="tabPaste" onclick="switchTab('paste')">Paste text</button>
+          <button class="ptab" id="tabUpload" onclick="switchTab('upload')">Upload .txt</button>
+        </div>
+
+        <div id="pasteArea">
+          <textarea
+            id="inputText"
+            class="text-area"
+            placeholder="Type or paste English text here…"
+            spellcheck="false"
+            oninput="updateCharCount()"
+            aria-label="Input text"
+          ></textarea>
+          <div class="panel-footer">
+            <span class="char-count" id="charCount">0 chars</span>
+            <button class="clear-btn" onclick="clearInput()" aria-label="Clear input">Clear</button>
+          </div>
+        </div>
+
+        <div id="uploadArea" style="display:none">
+          <div class="drop-zone" id="dropZone"
+            onclick="document.getElementById('fileInput').click()"
+            ondragover="onDragOver(event)"
+            ondragleave="onDragLeave(event)"
+            ondrop="onDrop(event)"
+            role="button"
+            tabindex="0"
+            aria-label="Drop zone for .txt files"
+          >
+            <div class="drop-icon">↑</div>
+            <div class="drop-title">Drop a .txt file here</div>
+            <div class="drop-sub">or click to browse</div>
+          </div>
+          <input type="file" id="fileInput" accept=".txt" style="display:none" onchange="handleFileInput(event)" />
+          <div class="file-info" id="fileInfo" style="display:none">
+            <span id="fileName"></span>
+            <button onclick="clearFile()" aria-label="Remove file">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- OUTPUT PANEL -->
+      <div class="panel" id="outputPanel">
+        <div class="panel-header-row">
+          <span class="panel-lang-label" id="outputLangLabel">Translation</span>
+          <div class="output-actions">
+            <button class="action-btn" id="copyBtn" onclick="copyOutput()" title="Copy" aria-label="Copy translation">
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="4" y="4" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1" stroke="currentColor" stroke-width="1.2"/></svg>
+              Copy
+            </button>
+            <button class="action-btn" onclick="downloadOutput()" title="Download" aria-label="Download translation">
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1v9M4 7l3.5 3.5L11 7M2 13h11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Save
+            </button>
+          </div>
+        </div>
+
+        <div id="outputContent" class="output-content">
+          <div class="output-placeholder" id="placeholder">
+            <div class="placeholder-icon">⟲</div>
+            <div class="placeholder-text">Your translation will appear here</div>
+          </div>
+          <div class="output-text" id="outputText" style="display:none" aria-live="polite"></div>
+          <div class="loading-state" id="loadingState" style="display:none" aria-live="polite">
+            <div class="dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span class="loading-label">Translating…</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="translate-btn" id="translateBtn" onclick="runTranslate()">
+      Translate
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
